@@ -4,45 +4,71 @@ var https = require('https');
 var path = require('path');
 var config = require('./config.js');
 
-console.log(config);
-
 app.get('/', function (req, res) {
-  res.send('Hello World!');
 
-  var apiKey = config.apiKey; 
+// setup the api request URL 
+  var apiKey = config.apiKey, 
+  // can be autocomplete, textsearch, or some other possibilities
+  // look at google places api docs for more options
+    searchType = 'autocomplete', 
+    cityName= 'new york', 
+    cityName = encodeURIComponent(cityName.trim()); 
+    searchPlace = 'le bain', 
+    searchPlace = encodeURIComponent(searchPlace.trim()); 
 
-  console.log(apiKey);
-
-  url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Amoeba&types=establishment&location=37.76999,-122.44696&radius=500&key='+apiKey; 
-
-    function callback (body){
-        console.log(body);
+    function callback (parsed){
+        res.send(parsed);
+        console.log(parsed);
     }
 
-    function getTestPersonaLoginCredentials(callback) {
+    // https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4&key=YOUR_API_KEY
+
+    function googlePlacesAutocompleteSearch(callback) {
 
         return https.get({
             host: 'maps.googleapis.com',
-            path: '/maps/api/place/autocomplete/json?input=Amoeba&types=establishment&location=40.7127,74.0059&radius=500&key='+apiKey
+            path: '/maps/api/place/'+searchType+'/json?input='+cityName+searchPlace+'&types=establishment&key='+apiKey
         }, function(response) {
 
-            // Continuously update stream with data
-            var body = '';
+            var body = '';      
             response.on('data', function(d) {
-
-                body += d;
+            body += d;
             });
 
             response.on('end', function() {
-
-                // Data reception is done, do whatever with it!
-                // var parsed = JSON.parse(body);
-                callback(body);
+            // Data reception is done, do whatever with it!
+            var parsed = JSON.parse(body);
+            callback(parsed);
             });
+
         });
+
     }
 
-    getTestPersonaLoginCredentials(callback); 
+    function googlePlacesDetailsSearch(callback) {
+
+        return https.get({
+            host: 'maps.googleapis.com',
+            path: '/maps/api/place/details/json?placeid=ChIJN-93ZsBZwokRpyoeLj9bzqQ&key='+apiKey
+        }, function(response) {
+
+            var body = '';      
+            response.on('data', function(d) {
+            body += d;
+            });
+
+            response.on('end', function() {
+            // Data reception is done, do whatever with it!
+            var parsed = JSON.parse(body);
+            callback(parsed);
+            });
+
+        });
+
+    }
+
+    googlePlacesDetailsSearch(callback)
+    // googlePlacesAutocompleteSearch(callback); 
 
 }); 
 

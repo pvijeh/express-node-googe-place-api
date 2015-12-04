@@ -6,28 +6,29 @@ var config = require('./config.js');
 
 app.get('/', function (req, res) {
 
-// setup the api request URL 
-  var apiKey = config.apiKey, 
-  // can be autocomplete, textsearch, or some other possibilities
-  // look at google places api docs for more options
-    searchType = 'autocomplete', 
-    cityName= 'new york', 
-    cityName = encodeURIComponent(cityName.trim()); 
-    searchPlace = 'le bain', 
-    searchPlace = encodeURIComponent(searchPlace.trim()); 
-
     function callback (parsed){
         res.send(parsed);
         console.log(parsed);
     }
 
-    // https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4&key=YOUR_API_KEY
+    googlePlacesSearch = {
+        // setup the api request URL 
+        apiKey : '&key='+config.apiKey, 
+        host :  'maps.googleapis.com', 
 
-    function googlePlacesAutocompleteSearch(callback) {
+        autocompleteSearch : function (callback) {
+            var  searchType = 'autocomplete', 
+            inputType = 'input=',
+            cityName= 'new york', 
+            cityName = encodeURIComponent(cityName.trim()), 
+            placeType= '&types=establishment', 
+            searchPlace = 'le bain', 
+            searchPlace = encodeURIComponent(searchPlace.trim()),
+            placeId = ''; 
 
         return https.get({
-            host: 'maps.googleapis.com',
-            path: '/maps/api/place/'+searchType+'/json?input='+cityName+searchPlace+'&types=establishment&key='+apiKey
+            host: this.host,
+            path: '/maps/api/place/'+searchType+'/json?'+inputType+cityName+searchPlace+placeType+placeId+this.apiKey
         }, function(response) {
 
             var body = '';      
@@ -40,16 +41,22 @@ app.get('/', function (req, res) {
             var parsed = JSON.parse(body);
             callback(parsed);
             });
-
         });
+    },  // close autocompleteSearch
 
-    }
-
-    function googlePlacesDetailsSearch(callback) {
+    detailsSearch : function (callback){
+            var  searchType = 'details',  // details
+            inputType = 'placeid=',  // either input= or placeid= 
+            cityName= '', 
+            cityName = encodeURIComponent(cityName.trim()), 
+            placeType= '', 
+            searchPlace = '', 
+            searchPlace = encodeURIComponent(searchPlace.trim()),
+            placeId = 'ChIJN-93ZsBZwokRpyoeLj9bzqQ'; 
 
         return https.get({
-            host: 'maps.googleapis.com',
-            path: '/maps/api/place/details/json?placeid=ChIJN-93ZsBZwokRpyoeLj9bzqQ&key='+apiKey
+            host: this.host,
+            path: '/maps/api/place/'+searchType+'/json?'+inputType+cityName+searchPlace+placeType+placeId+this.apiKey
         }, function(response) {
 
             var body = '';      
@@ -62,13 +69,13 @@ app.get('/', function (req, res) {
             var parsed = JSON.parse(body);
             callback(parsed);
             });
-
         });
+    } // close detailsSearch
 
-    }
+    }  // close googlePlacesSearch object
 
-    googlePlacesDetailsSearch(callback)
-    // googlePlacesAutocompleteSearch(callback); 
+    googlePlacesSearch.detailsSearch(callback); 
+    // googlePlacesSearch.autocompleteSearch(callback)
 
 }); 
 

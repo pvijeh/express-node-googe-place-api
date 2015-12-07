@@ -6,7 +6,7 @@ var config = require('./config.js');
 
 app.get('/', function (req, res) {
 
-    function callback (parsed){
+var callback = function (parsed){
         res.send(parsed);
         console.log(parsed);
     }

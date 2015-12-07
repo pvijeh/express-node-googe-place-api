@@ -11,24 +11,31 @@ app.get('/', function (req, res) {
         console.log(parsed);
     }
 
-    googlePlacesSearch = {
-        // setup the api request URL 
-        apiKey : '&key='+config.apiKey, 
-        host :  'maps.googleapis.com', 
+    function CallGooglePlacesAPI (searchtype, cityname, searchplace, placeid){
+        this.apiKey = '&key='+config.apiKey,
+        this.host = 'maps.googleapis.com', 
+        this.searchType = searchtype, // can be autocomplete or details
+        this.inputType = 'input=',
+        this.cityName = encodeURIComponent(cityname.trim()), 
+        this.placeType = '&types=establishment', 
+        this.searchPlace = encodeURIComponent(searchplace.trim()), 
+        this.placeId = placeid ? placeid : '',  // place id should be provided if it is a details search
 
-        autocompleteSearch : function (callback) {
-            var  searchType = 'autocomplete', 
-            inputType = 'input=',
-            cityName= 'new york', 
-            cityName = encodeURIComponent(cityName.trim()), 
-            placeType= '&types=establishment', 
-            searchPlace = 'le bain', 
-            searchPlace = encodeURIComponent(searchPlace.trim()),
-            placeId = ''; 
+        // glues together all the inputs to great the api URL path
+        this.path = 
+            '/maps/api/place/'
+            +this.searchType
+            +'/json?'+this.inputType
+            +this.cityName
+            +this.searchPlace
+            +this.placeType
+            +this.placeId
+            +this.apiKey
 
-        return https.get({
+            // calls the API 
+          this.callAPI  = https.get({
             host: this.host,
-            path: '/maps/api/place/'+searchType+'/json?'+inputType+cityName+searchPlace+placeType+placeId+this.apiKey
+            path: this.path
         }, function(response) {
 
             var body = '';      
@@ -42,40 +49,11 @@ app.get('/', function (req, res) {
             callback(parsed);
             });
         });
-    },  // close autocompleteSearch
+    }  // close CallGooglePlacesApi
 
-    detailsSearch : function (callback){
-            var  searchType = 'details',  // details
-            inputType = 'placeid=',  // either input= or placeid= 
-            cityName= '', 
-            cityName = encodeURIComponent(cityName.trim()), 
-            placeType= '', 
-            searchPlace = '', 
-            searchPlace = encodeURIComponent(searchPlace.trim()),
-            placeId = 'ChIJN-93ZsBZwokRpyoeLj9bzqQ'; 
+    var AutoCompleteSearch = new CallGooglePlacesAPI('autocomplete', 'new york', 'le bain'); 
 
-        return https.get({
-            host: this.host,
-            path: '/maps/api/place/'+searchType+'/json?'+inputType+cityName+searchPlace+placeType+placeId+this.apiKey
-        }, function(response) {
-
-            var body = '';      
-            response.on('data', function(d) {
-            body += d;
-            });
-
-            response.on('end', function() {
-            // Data reception is done, do whatever with it!
-            var parsed = JSON.parse(body);
-            callback(parsed);
-            });
-        });
-    } // close detailsSearch
-
-    }  // close googlePlacesSearch object
-
-    googlePlacesSearch.detailsSearch(callback); 
-    // googlePlacesSearch.autocompleteSearch(callback)
+    console.log(AutoCompleteSearch.callAPI);
 
 }); 
 

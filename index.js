@@ -44,14 +44,14 @@ var callback = function (parsed){
             });
 
             response.on('end', function() {
-            // Data reception is done, do whatever with it!
+            // Data reception is done, do whatev. 
             var parsed = JSON.parse(body);
             callback(parsed);
             });
         });
     }  // close CallGooglePlacesApi
 
-    var AutoCompleteSearch = new CallGooglePlacesAPI('autocomplete', 'new york', 'le bain'); 
+    var AutoCompleteSearch = new CallGooglePlacesAPI('autocomplete', 'new york', 'acme'); 
 
     console.log(AutoCompleteSearch.callAPI);
 

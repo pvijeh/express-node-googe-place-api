@@ -6,7 +6,7 @@ var config = require('./config.js');
 
 app.get('/', function (req, res) {
 
-var callback = function (parsed){
+    var callback = function (parsed){
         res.send(parsed);
         console.log(parsed);
     }
@@ -38,28 +38,26 @@ var callback = function (parsed){
             path: this.path
         }, function(response) {
 
-            var body = '';      
-            response.on('data', function(d) {
-            body += d;
+                var body = '';      
+                response.on('data', function(d) {
+                body += d;
+                });
+
+                response.on('end', function() {
+                // Data reception is done, do whatev. 
+                var parsed = JSON.parse(body);
+                callback(parsed);
+                });
             });
+        }  // close CallGooglePlacesApi
 
-            response.on('end', function() {
-            // Data reception is done, do whatev. 
-            var parsed = JSON.parse(body);
-            callback(parsed);
-            });
-        });
-    }  // close CallGooglePlacesApi
-
-    var AutoCompleteSearch = new CallGooglePlacesAPI('autocomplete', 'new york', 'acme'); 
-
-    console.log(AutoCompleteSearch.callAPI);
+        var AutoCompleteSearch = new CallGooglePlacesAPI('autocomplete', 'new york', 'acme'); 
+        console.log(AutoCompleteSearch.callAPI);
 
 }); 
 
 var server = app.listen(3000, function () {
   var host = server.address().address;
   var port = server.address().port;
-
   console.log('Example app listening at http://%s:%s', host, port);
 });
